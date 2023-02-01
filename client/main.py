@@ -8,7 +8,8 @@ from aio_pika.exceptions import ChannelNotFoundEntity
 
 
 EXCHANGER = "amq.direct"
-ROUTING_KEY = "order.created"
+ROUTING_KEY_TO_FIRST_SERVICE = "user.mailing"
+ROUTING_KEY_TO_SECOND_SERVICE = "orders.checkout"
 
 QUEUE_NAME_TO_FIRST_SERVICE = "notify_user"
 QUEUE_NAME_TO_SECOND_SERVICE = "change_balance"
@@ -29,12 +30,12 @@ foo_data = {
 }
 
 
-@app.get("/sync-endpoint")
-def sync_endpoint():
+@app.post("/api/user/subscribe")
+def subscribe_user():
     connection = pika.BlockingConnection(pika.ConnectionParameters("localhost"))
     channel = connection.channel()
-    channel.queue_bind(QUEUE_NAME_TO_FIRST_SERVICE, "amq.direct", ROUTING_KEY)
-    channel.basic_publish(EXCHANGER, ROUTING_KEY, json.dumps(foo_data).encode())
+    channel.queue_bind(QUEUE_NAME_TO_FIRST_SERVICE, "amq.direct", ROUTING_KEY_TO_FIRST_SERVICE)
+    channel.basic_publish(EXCHANGER, ROUTING_KEY_TO_FIRST_SERVICE, json.dumps(foo_data).encode())
     return {"detail": "User subscribed."}
 
 
@@ -43,8 +44,8 @@ async def async_connect_to_broker() -> Channel:
     return await a_connection.channel()
 
 
-@app.get("/async-endpoint")
-async def async_endpoint():
+@app.post("/api/order/checkout")
+async def order_checkout():
     connection = await connect_robust("amqp://guest:guest@localhost/")
     channel = await connection.channel()
     exchange = await channel.get_exchange(EXCHANGER)
@@ -52,9 +53,9 @@ async def async_endpoint():
         queue = await channel.get_queue(QUEUE_NAME_TO_SECOND_SERVICE)
     except ChannelNotFoundEntity:
         queue = await channel.declare_queue(QUEUE_NAME_TO_SECOND_SERVICE, durable=True)
-    await queue.bind(exchange, ROUTING_KEY)
+    await queue.bind(exchange, ROUTING_KEY_TO_SECOND_SERVICE)
     message = Message(json.dumps(foo_data).encode(), content_type="application/json")
-    await exchange.publish(message, ROUTING_KEY)
+    await exchange.publish(message, ROUTING_KEY_TO_SECOND_SERVICE)
     return {"detail": "Order created."}
 
 
