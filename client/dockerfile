@@ -1,0 +1,3 @@
+FROM python
+RUN pip install aio-pika pika fastapi
+CMD [ "python3", "main.py" ]

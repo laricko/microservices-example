@@ -1,0 +1,3 @@
+FROM python
+RUN pip install pika
+CMD [ "python3", "main.py" ]
