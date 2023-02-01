@@ -10,29 +10,35 @@
 ### Start
 
 ```
-$ docker-compose up --build
+docker-compose up --build
 ```
 
-open new terminal then
+open new terminal
 
 ```
 cd client
 python3 main.py
 ```
 
-open new terminal then
+open new terminal
 
 ```
 cd service1
 python3 main.py
 ```
 
-open new terminal then
+open new terminal
 
 ```
 cd service2
 python3 main.py
 ```
+
+### Usage
+
+Go to `http://localhost:8000/docs`
+
+Make request to any endpoint and look in terminal
 
 ### Requirements to start
 
