@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+  service1:
+    container_name: template_service1
+    build: service1
+    volumes:
+      - ./service1:/app/
+    restart: always
+  
+  service2:
+    container_name: template_service2
+    build: service2
+    volumes:
+      - ./service2:/app/
+    restart: always

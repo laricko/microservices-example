@@ -5,5 +5,7 @@ services:
     image: "rabbitmq:management"
     container_name: template_rabbitmq
     ports:
-      - "5672:5672"
       - "15672:15672"
+      # - "5672:5672"
+    expose:
+      - 5672

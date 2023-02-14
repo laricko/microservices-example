@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+  client:
+    build: client
+    container_name: template_client
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./client:/app/
+    restart: always

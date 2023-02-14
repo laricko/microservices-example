@@ -1,3 +1,5 @@
 FROM python
-RUN pip install aio-pika pika fastapi
+WORKDIR /app/
+ADD . /app/
+RUN pip install aio-pika pika fastapi uvicorn
 CMD [ "python3", "main.py" ]

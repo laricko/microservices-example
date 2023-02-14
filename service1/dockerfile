@@ -1,3 +1,5 @@
 FROM python
+WORKDIR /app/
+ADD . /app/
 RUN pip install pika
-CMD [ "python3", "main.py" ]
+CMD [ "python3", "-u", "main.py" ]

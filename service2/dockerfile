@@ -1,3 +1,5 @@
 FROM python
+WORKDIR /app/
+ADD . /app/
 RUN pip install aio-pika
-CMD [ "python", "main.py" ]
+CMD [ "python3", "-u", "main.py" ]

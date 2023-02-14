@@ -3,7 +3,7 @@ import json
 import uvicorn
 import pika
 from fastapi import FastAPI
-from aio_pika import connect_robust, Channel, Message
+from aio_pika import Message, connect
 from aio_pika.exceptions import ChannelNotFoundEntity
 
 
@@ -12,7 +12,7 @@ ROUTING_KEY_TO_FIRST_SERVICE = "user.mailing"
 ROUTING_KEY_TO_SECOND_SERVICE = "orders.checkout"
 
 QUEUE_NAME_TO_FIRST_SERVICE = "notify_user"
-QUEUE_NAME_TO_SECOND_SERVICE = "change_balance"
+QUEUE_NAME_TO_SECOND_SERVICE = "changebalance_orders"
 
 
 app = FastAPI()
@@ -32,21 +32,20 @@ foo_data = {
 
 @app.post("/api/user/subscribe")
 def subscribe_user():
-    connection = pika.BlockingConnection(pika.ConnectionParameters("localhost"))
+    connection = pika.BlockingConnection(pika.ConnectionParameters("rabbitmq"))
     channel = connection.channel()
-    channel.queue_bind(QUEUE_NAME_TO_FIRST_SERVICE, "amq.direct", ROUTING_KEY_TO_FIRST_SERVICE)
-    channel.basic_publish(EXCHANGER, ROUTING_KEY_TO_FIRST_SERVICE, json.dumps(foo_data).encode())
+    channel.queue_bind(
+        QUEUE_NAME_TO_FIRST_SERVICE, "amq.direct", ROUTING_KEY_TO_FIRST_SERVICE
+    )
+    channel.basic_publish(
+        EXCHANGER, ROUTING_KEY_TO_FIRST_SERVICE, json.dumps(foo_data).encode()
+    )
     return {"detail": "User subscribed."}
-
-
-async def async_connect_to_broker() -> Channel:
-    a_connection = await connect_robust("amqp://guest:guest@localhost/")
-    return await a_connection.channel()
 
 
 @app.post("/api/order/checkout")
 async def order_checkout():
-    connection = await connect_robust("amqp://guest:guest@localhost/")
+    connection = await connect(host="rabbitmq")
     channel = await connection.channel()
     exchange = await channel.get_exchange(EXCHANGER)
     try:
@@ -60,4 +59,4 @@ async def order_checkout():
 
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="localhost", port=8000, log_level="debug", reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, log_level="debug", reload=True)
