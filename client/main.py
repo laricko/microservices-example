@@ -3,7 +3,7 @@ import json
 import uvicorn
 import pika
 from fastapi import FastAPI
-from aio_pika import Message, connect
+from aio_pika import Message, connect_robust
 from aio_pika.exceptions import ChannelNotFoundEntity
 
 
@@ -32,10 +32,13 @@ foo_data = {
 
 @app.post("/api/user/subscribe")
 def subscribe_user():
+    """
+    Example logic: user subscribed on news. And `service1` handles.
+    """
     connection = pika.BlockingConnection(pika.ConnectionParameters("rabbitmq"))
     channel = connection.channel()
     channel.queue_bind(
-        QUEUE_NAME_TO_FIRST_SERVICE, "amq.direct", ROUTING_KEY_TO_FIRST_SERVICE
+        QUEUE_NAME_TO_FIRST_SERVICE, EXCHANGER, ROUTING_KEY_TO_FIRST_SERVICE
     )
     channel.basic_publish(
         EXCHANGER, ROUTING_KEY_TO_FIRST_SERVICE, json.dumps(foo_data).encode()
@@ -45,7 +48,10 @@ def subscribe_user():
 
 @app.post("/api/order/checkout")
 async def order_checkout():
-    connection = await connect(host="rabbitmq")
+    """
+    Example logic: user checkout order. And `service2` handles
+    """
+    connection = await connect_robust(host="rabbitmq")
     channel = await connection.channel()
     exchange = await channel.get_exchange(EXCHANGER)
     try:

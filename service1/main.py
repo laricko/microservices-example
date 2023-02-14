@@ -7,6 +7,9 @@ QUEUE_NAME_TO_FIRST_SERVICE = "notify_user"
 
 
 def notify_user(ch, method, properties, data):
+    """
+    Logic service
+    """
     data = json.loads(data.decode())
     user = data.get("user_id")
     print(f"[*] - User with id {user} just notified. And subscribed")

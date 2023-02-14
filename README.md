@@ -10,29 +10,9 @@
 ### Start
 
 ```
-docker-compose up --build
+make up_broker && make up
 ```
 
-open new terminal
-
-```
-cd client
-python3 main.py
-```
-
-open new terminal
-
-```
-cd service1
-python3 main.py
-```
-
-open new terminal
-
-```
-cd service2
-python3 main.py
-```
 
 ### Usage
 
